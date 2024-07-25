@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 const name = 'sequencer';
-const version = 52;
+const version = 53;
 const files = [
   './',
   'css/bulma-addons.css',
