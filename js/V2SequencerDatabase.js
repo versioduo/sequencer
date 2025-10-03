@@ -1,6 +1,3 @@
-// © Kay Sievers <kay@versioduo.com>, 2023
-// SPDX-License-Identifier: Apache-2.0
-
 class V2SequencerDatabase {
   static #getStore(store, handler) {
     const request = window.indexedDB.open('sequencer', 1);
