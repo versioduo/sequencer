@@ -1,5 +1,5 @@
 const name = 'sequencer';
-const version = 55;
+const version = 57;
 const files = [
   './',
   'css/bulma-addons.css',
