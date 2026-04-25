@@ -1,10 +1,9 @@
 const name = 'sequencer';
-const version = 59;
+const version = 60;
 const files = [
   './',
   'css/bulma-addons.css',
   'css/bulma.min.css',
-  'css/fontawesome.min.css',
   'css/fonts.css',
   'icons/logo-black.svg',
   'icons/logo-boxed.png',
@@ -21,7 +20,6 @@ const files = [
   'site.webmanifest',
   'webfonts/AlteDIN1451Mittelschrift.woff2',
   'webfonts/fa-brands-400.woff2',
-  'webfonts/fa-regular-400.woff2',
   'webfonts/fa-solid-900.woff2'
 ];
 
