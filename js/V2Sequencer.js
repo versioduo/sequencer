@@ -493,7 +493,7 @@ class V2Sequencer extends V2WebModule {
         this.#run.wakeLock = await navigator.wakeLock.request('screen');
         this.#run.wakeLock.onrelease = () => {
           this.#stop();
-          this.#notify.warn('The playback was paused because the application moved into the background.');
+          this.#notify.warn('The playback was paused because the application moved to the background.');
         };
       }
 
