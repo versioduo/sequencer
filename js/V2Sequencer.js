@@ -58,8 +58,8 @@ class V2Sequencer extends V2WebModule {
       }
     });
 
-    V2Web.addButtons(this.canvas, (buttons) => {
-      V2Web.addButton(buttons, (e) => {
+    new V2WebMenu(this.canvas, (menu) => {
+      menu.addElement('button', (e) => {
         e.textContent = 'Reset';
         e.addEventListener('click', () => {
           this.#reset();
@@ -69,7 +69,7 @@ class V2Sequencer extends V2WebModule {
         });
       });
 
-      V2Web.addButton(buttons, (e) => {
+      menu.addElement('button', (e) => {
         this.#stopButton = e;
         e.textContent = 'Stop';
         e.disabled = true;
@@ -79,9 +79,9 @@ class V2Sequencer extends V2WebModule {
         });
       });
 
-      V2Web.addButton(buttons, (e) => {
+      menu.addElement('button', (e) => {
         this.#playButton = e;
-        e.classList.add('is-link');
+        e.classList.add('primary');
         e.textContent = 'Play';
 
         e.addEventListener('click', () => {
@@ -109,37 +109,52 @@ class V2Sequencer extends V2WebModule {
         this.#output.sendControlChange(V2MIDI.CC.channelVolume, Number(number));
       };
 
-      new V2WebField(this.canvas, (field) => {
-        field.addButton((e) => {
-          e.classList.add('width-label');
-          e.classList.add('has-background-grey-lighter');
-          e.classList.add('inactive');
+      new V2WebMenu(this.canvas, (menu) => {
+        menu.element.classList.add('full');
+
+        menu.addElement('span', (e) => {
+          e.classList.add('label');
           e.textContent = 'CC 7';
-          e.tabIndex = -1;
         });
 
-        field.addButton((e) => {
-          e.classList.add('width-text');
-          e.classList.add('has-background-light');
-          e.classList.add('inactive');
+        menu.addElement('span', (e) => {
+          e.classList.add('grow');
           e.textContent = 'Volume';
-          e.tabIndex = -1;
         });
 
-        field.addInput('number', (e) => {
+        menu.addElement('input', (e) => {
           this.#volume.element = e;
-          e.classList.add('width-number');
+          e.type = 'number';
           e.max = 127;
           e.value = 100;
           e.addEventListener('input', () => {
             this.#volume.update(e.value);
           });
         });
+
+        menu.addElement('button', (e) => {
+          V2Web.addElement(e, 'i', (i) => {
+            i.classList.add('icon', '--nospace', '--minus');
+          });
+          e.addEventListener('click', () => {
+            this.#volume.element.stepDown();
+            this.#volume.element.dispatchEvent(new Event('input'));
+          });
+        });
+
+        menu.addElement('button', (e) => {
+          V2Web.addElement(e, 'i', (i) => {
+            i.classList.add('icon', '--nospace', '--plus');
+          });
+          e.addEventListener('click', () => {
+            this.#volume.element.stepUp();
+            this.#volume.element.dispatchEvent(new Event('input'));
+          });
+        });
       });
 
       V2Web.addElement(this.canvas, 'input', (e) => {
         range = e;
-        e.classList.add('range');
         e.type = 'range';
         e.max = 127;
         e.value = 100;
@@ -168,17 +183,17 @@ class V2Sequencer extends V2WebModule {
           this.#setTimer();
       };
 
-      new V2WebField(this.canvas, (field) => {
-        field.addButton((e) => {
-          e.classList.add('width-label');
-          e.classList.add('has-background-grey-lighter');
-          e.classList.add('inactive');
+      new V2WebMenu(this.canvas, (menu) => {
+        menu.element.classList.add('full');
+
+        menu.addElement('span', (e) => {
+          e.classList.add('grow');
           e.textContent = 'BPM';
         });
 
-        field.addInput('number', (e) => {
+        menu.addElement('input', (e) => {
           this.#bpm.element = e;
-          e.classList.add('width-number');
+          e.type = 'number';
           e.min = 20;
           e.max = 999;
           e.value = 120;
@@ -196,19 +211,23 @@ class V2Sequencer extends V2WebModule {
           });
         });
 
-        field.addButton((e) => {
-          e.textContent = '-';
-          e.style.width = '3rem';
+        menu.addElement('button', (e) => {
+          V2Web.addElement(e, 'i', (i) => {
+            i.classList.add('icon', '--nospace', '--minus');
+          });
           e.addEventListener('click', () => {
-            this.#bpm.update(Number(this.#bpm.element.value) - 1);
+            this.#bpm.element.stepDown();
+            this.#bpm.element.dispatchEvent(new Event('input'));
           });
         });
 
-        field.addButton((e) => {
-          e.textContent = '+';
-          e.style.width = '3rem';
+        menu.addElement('button', (e) => {
+          V2Web.addElement(e, 'i', (i) => {
+            i.classList.add('icon', '--nospace', '--plus');
+          });
           e.addEventListener('click', () => {
-            this.#bpm.update(Number(this.#bpm.element.value) + 1);
+            this.#bpm.element.stepUp();
+            this.#bpm.element.dispatchEvent(new Event('input'));
           });
         });
       });
@@ -216,7 +235,6 @@ class V2Sequencer extends V2WebModule {
       V2Web.addElement(this.canvas, 'input', (e) => {
         range = e;
         e.type = 'range';
-        e.classList.add('range');
         e.min = 20;
         e.max = 999;
         e.value = this.#bpm.element.value;
@@ -226,10 +244,7 @@ class V2Sequencer extends V2WebModule {
       });
     }
 
-    V2Web.addElement(this.canvas, 'div', (e) => {
-      e.classList.add('mt-4');
-      e.classList.add('mb-5');
-
+    {
       class Pad {
         element = null;
         velocity = 0;
@@ -249,10 +264,10 @@ class V2Sequencer extends V2WebModule {
 
           } else {
             if (Math.floor(quarter / 4) % 2)
-              this.element.style.backgroundColor = 'hsl(0, 0%, 96%)';
+              this.element.style.backgroundColor = 'hsl(from var(--colour-background-light) h s calc(l - 10))';
 
             else
-              this.element.style.backgroundColor = 'hsl(0, 0%, 100%)';
+              this.element.style.backgroundColor = 'var(--colour-background-light)';
           }
         }
       };
@@ -260,14 +275,13 @@ class V2Sequencer extends V2WebModule {
       const rows = [];
 
       for (let track = 0; track < this.nTracks; track++) {
-        new V2WebField(e, (field) => {
+        new V2WebMenu(this.canvas, (menu) => {
+          menu.element.classList.add('bar');
+          menu.element.classList.add('full');
           const row = [];
 
           for (let quarter = 0; quarter < this.nQuarters; quarter++) {
-            field.addButton((e, p) => {
-              p.classList.add('is-expanded');
-              e.classList.add('pad');
-
+            menu.addElement('button', (e) => {
               const pad = new Pad(e);
               row[quarter] = pad;
               pad.setVelocity(0, quarter);
@@ -300,7 +314,7 @@ class V2Sequencer extends V2WebModule {
 
       this.#pads = Object.seal(rows);
       this.#highlightQuarter();
-    });
+    }
 
     {
       let range = null;
@@ -316,17 +330,16 @@ class V2Sequencer extends V2WebModule {
           this.#pads[this.#edit.track][this.#edit.quarter].setVelocity(number, this.#edit.quarter);
       };
 
-      new V2WebField(this.canvas, (field) => {
-        field.addButton((e) => {
-          e.classList.add('width-label');
-          e.classList.add('has-background-grey-lighter');
-          e.classList.add('inactive');
+      new V2WebMenu(this.canvas, (menu) => {
+        menu.element.classList.add('full');
+        menu.addElement('span', (e) => {
           e.textContent = 'Velocity';
+          e.classList.add('grow');
         });
 
-        field.addInput('number', (e) => {
+        menu.addElement('input', (e) => {
           this.#velocity.element = e;
-          e.classList.add('width-number');
+          e.type = 'number';
           e.min = 1;
           e.max = 127;
           e.value = 64;
@@ -342,12 +355,31 @@ class V2Sequencer extends V2WebModule {
               e.value = 127;
           });
         });
+
+        menu.addElement('button', (e) => {
+          V2Web.addElement(e, 'i', (i) => {
+            i.classList.add('icon', '--nospace', '--minus');
+          });
+          e.addEventListener('click', () => {
+            this.#velocity.element.stepDown();
+            this.#velocity.element.dispatchEvent(new Event('input'));
+          });
+        });
+
+        menu.addElement('button', (e) => {
+          V2Web.addElement(e, 'i', (i) => {
+            i.classList.add('icon', '--nospace', '--plus');
+          });
+          e.addEventListener('click', () => {
+            this.#velocity.element.stepUp();
+            this.#velocity.element.dispatchEvent(new Event('input'));
+          });
+        });
       });
 
       V2Web.addElement(this.canvas, 'input', (e) => {
         range = e;
         e.type = 'range';
-        e.classList.add('range');
         e.min = 1;
         e.max = 127;
         e.value = 64;
@@ -357,10 +389,9 @@ class V2Sequencer extends V2WebModule {
       });
     }
 
-    V2Web.addElement(this.canvas, 'div', (e) => {
+    V2Web.addElement(this.canvas, 'p', (e) => {
       this.#version = e;
-      e.classList.add('is-flex');
-      e.classList.add('is-justify-content-end');
+      e.classList.add('center');
       e.innerHTML = '<a href=' + document.querySelector('link[rel="source"]').href +
         ' target="software">' + document.querySelector('meta[name="name"]').content +
         '</a>, version ' + Number(document.querySelector('meta[name="version"]').content);
@@ -422,10 +453,9 @@ class V2Sequencer extends V2WebModule {
   #highlightQuarter(on = true) {
     for (let track = 0; track < this.nTracks; track++) {
       if (on)
-        this.#pads[track][this.#run.quarter].element.classList.add('is-focused');
-
+        this.#pads[track][this.#run.quarter].element.classList.add('highlight');
       else
-        this.#pads[track][this.#run.quarter].element.classList.remove('is-focused');
+        this.#pads[track][this.#run.quarter].element.classList.remove('highlight');
     }
   }
 

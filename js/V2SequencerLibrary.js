@@ -11,15 +11,14 @@ class V2SequencerLibrary extends V2WebModule {
   #list = null;
 
   constructor(sequencer) {
-    super('library', 'Library', 'Store and load patterns');
-
+    super('library', '--book-open-reader', 'Library', 'Store and Load Patterns');
     this.#sequencer = sequencer;
-
     this.#notify = new V2WebNotify(this.canvas);
 
-    V2Web.addButtons(this.canvas, (buttons) => {
-      V2Web.addButton(buttons, (e) => {
+    new V2WebMenu(this.canvas, (menu) => {
+      menu.addElement('button', (e) => {
         this.#addButton = e;
+        e.classList.add('primary');
         e.disabled = true;
         e.textContent = 'Add';
 
@@ -35,7 +34,7 @@ class V2SequencerLibrary extends V2WebModule {
         });
       });
 
-      V2Web.addButton(buttons, (e) => {
+      menu.addElement('button', (e) => {
         this.#deleteButton = e;
         e.disabled = true;
         e.textContent = 'Delete';
@@ -57,7 +56,7 @@ class V2SequencerLibrary extends V2WebModule {
         });
       });
 
-      V2Web.addButton(buttons, (e) => {
+      menu.addElement('button', (e) => {
         this.#copyButton = e;
         e.disabled = true;
         e.textContent = 'Copy';
@@ -78,7 +77,7 @@ class V2SequencerLibrary extends V2WebModule {
         });
       });
 
-      V2Web.addButton(buttons, (e) => {
+      menu.addElement('button', (e) => {
         this.#pasteButton = e;
         e.textContent = 'Paste';
 
@@ -140,10 +139,10 @@ class V2SequencerLibrary extends V2WebModule {
     for (const entry of this.#list.entries) {
       if (e === entry) {
         this.#list.selected = e;
-        entry.element.style.opacity = '100%';
+        entry.element.style.opacity = 1;
 
       } else
-        entry.element.style.opacity = '50%';
+        entry.element.style.opacity = 0.5;
     }
 
     this.#addButton.disabled = this.#list.selected !== null;
@@ -158,8 +157,12 @@ class V2SequencerLibrary extends V2WebModule {
       config: config
     });
 
-    entry.element.classList.add('library-entry');
-    entry.element.style.opacity = '50%';
+    entry.element.style.marginLeft = 'auto';
+    entry.element.style.marginRight = 'auto';
+    entry.element.style.width = 'calc(100% - 1rem)';
+    entry.element.style.opacity = 0.6;
+    entry.element.style.backgroundColor = 'var(--colour-background-light)';
+    entry.element.style.marginBottom = '0.5rem';
     entry.element.addEventListener('click', () => {
       this.#selectEntry(entry);
       this.#sequencer.setConfig(this.#list.selected.config);
@@ -182,7 +185,6 @@ class V2SequencerLibrary extends V2WebModule {
         }
       });
     }
-
 
     this.#list.element.insertAdjacentElement('afterbegin', entry.element);
     this.#list.entries.push(entry);

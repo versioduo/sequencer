@@ -1,13 +1,10 @@
 const name = 'sequencer';
-const version = 61;
+const version = 100;
 const files = [
   './',
-  'css/bulma-addons.css',
-  'css/bulma.min.css',
   'css/fonts.css',
+  'css/style.css',
   'icons/logo-black.svg',
-  'icons/logo-boxed.png',
-  'icons/logo-boxed.svg',
   'icons/logo-maskable.svg',
   'icons/logo.svg',
   'js/V2MIDI.js',
@@ -17,7 +14,7 @@ const files = [
   'js/V2SequencerLibrary.js',
   'js/V2SequencerOutput.js',
   'js/V2Web.js',
-  'site.webmanifest',
+  'manifest.json',
   'webfonts/AlteDIN1451Mittelschrift.woff2',
   'webfonts/fa-brands-400.woff2',
   'webfonts/fa-solid-900.woff2'

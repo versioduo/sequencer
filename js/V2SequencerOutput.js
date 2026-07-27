@@ -7,12 +7,12 @@ class V2SequencerOutput extends V2WebModule {
   });
 
   constructor(sequencer) {
-    super('output', 'Output', 'Assign devices and notes to tracks');
+    super('output', '--right-from-bracket', 'Output', 'Assign Devices and Notes to Tracks');
 
     this.#sequencer = sequencer;
 
-    V2Web.addButtons(this.canvas, (buttons) => {
-      V2Web.addButton(buttons, (e) => {
+    new V2WebMenu(this.canvas, (menu) => {
+      menu.addElement('button', (e) => {
         e.textContent = 'Reset';
         e.addEventListener('click', () => {
           this.reset();
@@ -59,13 +59,43 @@ class V2SequencerOutput extends V2WebModule {
     if (trackIndex > 0)
       V2Web.addElement(this.canvas, 'hr');
 
-    V2Web.addElement(this.canvas, 'h3', (e) => {
-      e.classList.add('subtitle');
+    V2Web.addElement(this.canvas, 'p', (e) => {
+      e.classList.add('title');
       e.innerText = 'Track ' + (trackIndex + 1);
     });
 
-    track.select = new V2MIDISelect(this.canvas, (e) => {
-      e.classList.add('mb-3');
+    new V2WebMenu(this.canvas, (menu) => {
+      menu.addElement('span', (e) => {
+        e.textContent = 'Device';
+      });
+
+      menu.addItem((li) => {
+        track.select = new V2MIDISelect(li);
+        track.select.element.classList.add('grow');
+      });
+    });
+
+    new V2WebMenu(this.canvas, (menu) => {
+      menu.addElement('span', (e) => {
+        e.textContent = 'Channel';
+      });
+
+      menu.addElement('select', (select) => {
+        track.channelElement = select;
+        select.classList.add('grow');
+
+        for (let i = 1; i < 17; i++) {
+          V2Web.addElement(select, 'option', (e) => {
+            e.value = i;
+            e.text = i;
+          });
+        }
+
+        select.addEventListener('change', () => {
+          for (const notifier of this.#notifiers.changed)
+            notifier();
+        });
+      });
     });
 
     this.#sequencer.midi.addNotifier('state', (event) => {
@@ -73,9 +103,9 @@ class V2SequencerOutput extends V2WebModule {
       this.#assignDevice(track);
     });
 
-    track.select.addNotifier('select', (selected) => {
-      if (selected) {
-        this.#copyDevice(selected);
+    track.select.addNotifier('select', (device) => {
+      if (device) {
+        this.#copyDevice(device);
 
       } else
         track.device = null;
@@ -84,39 +114,8 @@ class V2SequencerOutput extends V2WebModule {
         notifier();
     });
 
-    track.select.addNotifier('disconnect', (selected) => {
+    track.select.addNotifier('disconnect', (deviceF) => {
       track.device = null;
-    });
-
-    new V2WebField(this.canvas, (field) => {
-      field.addButton((e) => {
-        e.classList.add('width-label');
-        e.classList.add('has-background-grey-lighter');
-        e.classList.add('inactive');
-        e.textContent = 'Channel';
-        e.tabIndex = -1;
-      });
-
-      field.addElement('span', (e) => {
-        e.classList.add('select');
-        e.classList.add('is-rounded');
-
-        V2Web.addElement(e, 'select', (select) => {
-          track.channelElement = select;
-
-          for (let i = 1; i < 17; i++) {
-            V2Web.addElement(select, 'option', (e) => {
-              e.value = i;
-              e.text = i;
-            });
-          }
-
-          select.addEventListener('change', () => {
-            for (const notifier of this.#notifiers.changed)
-              notifier();
-          });
-        });
-      });
     });
 
     track.note.update = (number, silent = false) => {
@@ -133,34 +132,30 @@ class V2SequencerOutput extends V2WebModule {
 
       text.textContent = V2MIDI.Note.getName(number);
       if (V2MIDI.Note.isBlack(number)) {
-        text.classList.add('is-dark');
-        text.classList.remove('has-background-light');
-
+        text.classList.add('dark');
+        text.classList.remove('light');
       } else {
-        text.classList.remove('is-dark');
-        text.classList.add('has-background-light');
+        text.classList.add('light');
+        text.classList.remove('dark');
       }
     };
 
-    new V2WebField(this.canvas, (field) => {
-      field.addButton((e) => {
-        e.classList.add('width-label');
-        e.classList.add('has-background-grey-lighter');
-        e.classList.add('inactive');
-        e.tabIndex = -1;
+    new V2WebMenu(this.canvas, (menu) => {
+      menu.element.classList.add('full');
+
+      menu.addElement('span', (e) => {
         e.textContent = 'Note';
+        e.classList.add('label');
       });
 
-      field.addButton((e) => {
+      menu.addElement('span', (e) => {
+        e.classList.add('grow');
         text = e;
-        e.classList.add('width-label');
-        e.classList.add('inactive');
-        e.tabIndex = -1;
       });
 
-      field.addInput('number', (e) => {
+      menu.addElement('input', (e) => {
         track.note.element = e;
-        e.classList.add('width-number');
+        e.type = 'number';
         e.min = 21;
         e.max = 108;
 
@@ -179,17 +174,19 @@ class V2SequencerOutput extends V2WebModule {
         });
       });
 
-      field.addButton((e) => {
-        e.textContent = '-';
-        e.style.width = '3rem';
+      menu.addElement('button', (e) => {
+        V2Web.addElement(e, 'i', (i) => {
+          i.classList.add('icon', '--nospace', '--minus');
+        });
         e.addEventListener('click', () => {
           track.note.update(Number(this.#tracks[trackIndex].note.element.value) - 1);
         });
       });
 
-      field.addButton((e) => {
-        e.textContent = '+';
-        e.style.width = '3rem';
+      menu.addElement('button', (e) => {
+        V2Web.addElement(e, 'i', (i) => {
+          i.classList.add('icon', '--nospace', '--plus');
+        });
         e.addEventListener('click', () => {
           track.note.update(Number(track.note.element.value) + 1);
         });
@@ -198,7 +195,6 @@ class V2SequencerOutput extends V2WebModule {
 
     V2Web.addElement(this.canvas, 'input', (e) => {
       range = e;
-      e.classList.add('range');
       e.type = 'range';
       e.min = 21;
       e.max = 108;
@@ -231,7 +227,7 @@ class V2SequencerOutput extends V2WebModule {
       if (track.device)
         continue;
 
-      track.select.select(device);
+      track.select.selectEntry(device);
       track.deviceName = device.name;
       track.device = device.out;
     }
@@ -253,7 +249,7 @@ class V2SequencerOutput extends V2WebModule {
       if (device.name !== track.deviceName)
         continue;
 
-      track.select.select(device);
+      track.select.selectEntry(device);
       track.device = device.out;
       break;
     }
