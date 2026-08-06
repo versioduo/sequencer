@@ -1,4 +1,4 @@
-class V2SequencerLibrary extends V2WebModule {
+class V2SequencerLibrary extends V2AppSection {
   #sequencer = null;
 
   #notify = null;
@@ -13,9 +13,10 @@ class V2SequencerLibrary extends V2WebModule {
   constructor(sequencer) {
     super('library', '--book-open-reader', 'Library', 'Store and Load Patterns');
     this.#sequencer = sequencer;
-    this.#notify = new V2WebNotify(this.canvas);
+    this.addSection();
+    this.#notify = new V2AppNotify(this.canvas);
 
-    new V2WebMenu(this.canvas, (menu) => {
+    new V2AppMenu(this.canvas, (menu) => {
       menu.addElement('button', (e) => {
         this.#addButton = e;
         e.classList.add('primary');
@@ -111,7 +112,7 @@ class V2SequencerLibrary extends V2WebModule {
       });
     });
 
-    V2Web.addElement(this.canvas, 'ul', (e) => {
+    V2App.addElement(this.canvas, 'ul', (e) => {
       this.#list = Object.seal({
         element: e,
         entries: [],
@@ -129,7 +130,6 @@ class V2SequencerLibrary extends V2WebModule {
         this.#addEntry(entry);
     });
 
-    this.attach();
     return Object.seal(this);
   }
 
@@ -169,13 +169,13 @@ class V2SequencerLibrary extends V2WebModule {
     });
 
     for (let track = 0; track < this.#sequencer.nTracks; track++) {
-      V2Web.addElement(entry.element, 'div', (row) => {
+      V2App.addElement(entry.element, 'div', (row) => {
         row.style.width = '100%';
         row.style.height = '0.5rem';
         row.style.clear = 'left';
 
         for (let quarter = 0; quarter < this.#sequencer.nQuarters; quarter++) {
-          V2Web.addElement(row, 'div', (e) => {
+          V2App.addElement(row, 'div', (e) => {
             e.style.float = 'left';
             e.style.width = '6.25%';
             e.style.height = '100%';

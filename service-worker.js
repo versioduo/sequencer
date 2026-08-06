@@ -1,5 +1,5 @@
 const name = 'sequencer';
-const version = 100;
+const version = 103;
 const files = [
   './',
   'css/fonts.css',
@@ -7,13 +7,13 @@ const files = [
   'icons/logo-black.svg',
   'icons/logo-maskable.svg',
   'icons/logo.svg',
+  'js/V2App.js',
   'js/V2MIDI.js',
   'js/V2MIDISelect.js',
   'js/V2Sequencer.js',
   'js/V2SequencerDatabase.js',
   'js/V2SequencerLibrary.js',
   'js/V2SequencerOutput.js',
-  'js/V2Web.js',
   'manifest.json',
   'webfonts/AlteDIN1451Mittelschrift.woff2',
   'webfonts/fa-brands-400.woff2',

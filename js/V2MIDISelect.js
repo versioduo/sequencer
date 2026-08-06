@@ -8,7 +8,7 @@ class V2MIDISelect {
   #devices = null;
 
   constructor(canvas, handler) {
-    V2Web.addElement(canvas, 'select', (s) => {
+    V2App.addElement(canvas, 'select', (s) => {
       this.element = s;
       s.disabled = true;
       s.addEventListener('change', () => {
@@ -22,7 +22,7 @@ class V2MIDISelect {
         }
       });
 
-      V2Web.addElement(s, 'option', (e) => {
+      V2App.addElement(s, 'option', (e) => {
         e.textContent = 'Connect to ...';
         e.value = '';
       });
@@ -69,7 +69,7 @@ class V2MIDISelect {
 
       add = true;
 
-      V2Web.addElementAdjacent(after, 'afterend', 'option', (e) => {
+      V2App.addElementAdjacent(after, 'afterend', 'option', (e) => {
         after = e;
         e.value = id;
         e.text = device.name + (device.instance > 0 ? ' #' + (device.instance + 1) : '');

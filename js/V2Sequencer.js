@@ -1,4 +1,4 @@
-class V2Sequencer extends V2WebModule {
+class V2Sequencer extends V2AppSection {
   midi = null;
 
   nTracks = 4;
@@ -47,8 +47,8 @@ class V2Sequencer extends V2WebModule {
 
   constructor() {
     super('player');
-
-    this.#notify = new V2WebNotify(this.canvas);
+    this.addSection();
+    this.#notify = new V2AppNotify(this.canvas);
 
     this.midi = new V2MIDI();
     this.midi.setup((error) => {
@@ -58,7 +58,7 @@ class V2Sequencer extends V2WebModule {
       }
     });
 
-    new V2WebMenu(this.canvas, (menu) => {
+    new V2AppMenu(this.canvas, (menu) => {
       menu.addElement('button', (e) => {
         e.textContent = 'Reset';
         e.addEventListener('click', () => {
@@ -109,7 +109,7 @@ class V2Sequencer extends V2WebModule {
         this.#output.sendControlChange(V2MIDI.CC.channelVolume, Number(number));
       };
 
-      new V2WebMenu(this.canvas, (menu) => {
+      new V2AppMenu(this.canvas, (menu) => {
         menu.element.classList.add('full');
 
         menu.addElement('span', (e) => {
@@ -133,7 +133,7 @@ class V2Sequencer extends V2WebModule {
         });
 
         menu.addElement('button', (e) => {
-          V2Web.addElement(e, 'i', (i) => {
+          V2App.addElement(e, 'i', (i) => {
             i.classList.add('icon', '--nospace', '--minus');
           });
           e.addEventListener('click', () => {
@@ -143,7 +143,7 @@ class V2Sequencer extends V2WebModule {
         });
 
         menu.addElement('button', (e) => {
-          V2Web.addElement(e, 'i', (i) => {
+          V2App.addElement(e, 'i', (i) => {
             i.classList.add('icon', '--nospace', '--plus');
           });
           e.addEventListener('click', () => {
@@ -153,7 +153,7 @@ class V2Sequencer extends V2WebModule {
         });
       });
 
-      V2Web.addElement(this.canvas, 'input', (e) => {
+      V2App.addElement(this.canvas, 'input', (e) => {
         range = e;
         e.type = 'range';
         e.max = 127;
@@ -183,7 +183,7 @@ class V2Sequencer extends V2WebModule {
           this.#setTimer();
       };
 
-      new V2WebMenu(this.canvas, (menu) => {
+      new V2AppMenu(this.canvas, (menu) => {
         menu.element.classList.add('full');
 
         menu.addElement('span', (e) => {
@@ -212,7 +212,7 @@ class V2Sequencer extends V2WebModule {
         });
 
         menu.addElement('button', (e) => {
-          V2Web.addElement(e, 'i', (i) => {
+          V2App.addElement(e, 'i', (i) => {
             i.classList.add('icon', '--nospace', '--minus');
           });
           e.addEventListener('click', () => {
@@ -222,7 +222,7 @@ class V2Sequencer extends V2WebModule {
         });
 
         menu.addElement('button', (e) => {
-          V2Web.addElement(e, 'i', (i) => {
+          V2App.addElement(e, 'i', (i) => {
             i.classList.add('icon', '--nospace', '--plus');
           });
           e.addEventListener('click', () => {
@@ -232,7 +232,7 @@ class V2Sequencer extends V2WebModule {
         });
       });
 
-      V2Web.addElement(this.canvas, 'input', (e) => {
+      V2App.addElement(this.canvas, 'input', (e) => {
         range = e;
         e.type = 'range';
         e.min = 20;
@@ -275,7 +275,7 @@ class V2Sequencer extends V2WebModule {
       const rows = [];
 
       for (let track = 0; track < this.nTracks; track++) {
-        new V2WebMenu(this.canvas, (menu) => {
+        new V2AppMenu(this.canvas, (menu) => {
           menu.element.classList.add('bar');
           menu.element.classList.add('full');
           const row = [];
@@ -330,7 +330,7 @@ class V2Sequencer extends V2WebModule {
           this.#pads[this.#edit.track][this.#edit.quarter].setVelocity(number, this.#edit.quarter);
       };
 
-      new V2WebMenu(this.canvas, (menu) => {
+      new V2AppMenu(this.canvas, (menu) => {
         menu.element.classList.add('full');
         menu.addElement('span', (e) => {
           e.textContent = 'Velocity';
@@ -357,7 +357,7 @@ class V2Sequencer extends V2WebModule {
         });
 
         menu.addElement('button', (e) => {
-          V2Web.addElement(e, 'i', (i) => {
+          V2App.addElement(e, 'i', (i) => {
             i.classList.add('icon', '--nospace', '--minus');
           });
           e.addEventListener('click', () => {
@@ -367,7 +367,7 @@ class V2Sequencer extends V2WebModule {
         });
 
         menu.addElement('button', (e) => {
-          V2Web.addElement(e, 'i', (i) => {
+          V2App.addElement(e, 'i', (i) => {
             i.classList.add('icon', '--nospace', '--plus');
           });
           e.addEventListener('click', () => {
@@ -377,7 +377,7 @@ class V2Sequencer extends V2WebModule {
         });
       });
 
-      V2Web.addElement(this.canvas, 'input', (e) => {
+      V2App.addElement(this.canvas, 'input', (e) => {
         range = e;
         e.type = 'range';
         e.min = 1;
@@ -389,15 +389,13 @@ class V2Sequencer extends V2WebModule {
       });
     }
 
-    V2Web.addElement(this.canvas, 'p', (e) => {
+    V2App.addElement(this.canvas, 'p', (e) => {
       this.#version = e;
       e.classList.add('center');
       e.innerHTML = '<a href=' + document.querySelector('link[rel="source"]').href +
         ' target="software">' + document.querySelector('meta[name="name"]').content +
         '</a>, version ' + Number(document.querySelector('meta[name="version"]').content);
     });
-
-    this.attach();
 
     this.#library = new V2SequencerLibrary(this);
     this.#output = new V2SequencerOutput(this);

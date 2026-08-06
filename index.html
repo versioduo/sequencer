@@ -5,8 +5,8 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <meta name="name" content="sequencer">
     <meta name="description" content="MIDI Sequencer">
-    <meta name="version" content="100">
-    <meta name="revised" content="2026-08-03">
+    <meta name="version" content="103">
+    <meta name="revised" content="2026-08-06">
     <meta name="copyright" content="Anyone can use this public domain work without having to seek authorisation, no one can ever own it.">
     <meta name="rating" content="safe for kids">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,7 +29,7 @@
       </details>
     </nav>
     <main></main>
-    <script src="js/V2Web.js"></script>
+    <script src="js/V2App.js"></script>
     <script src="js/V2MIDI.js"></script>
     <script src="js/V2MIDISelect.js"></script>
     <script src="js/V2Sequencer.js"></script>
@@ -39,11 +39,11 @@
     <script>
       'use strict';
 
-      {
-        V2Web.setup();
+      new V2App((app) => {
+        new V2Sequencer();
 
         // Cache the content for offline operation.
-        V2Web.registerServiceWorker('service-worker.js', (state, newWorker) => {
+        app.registerServiceWorker('service-worker.js', (state, newWorker) => {
           // There is no worker during the intial setup.
           if (!navigator.serviceWorker.controller)
             return;
@@ -51,7 +51,7 @@
           switch (state) {
             case 'installed':
               // A new version was installed into the cache and a new worker is waiting to take control.
-              V2Web.notifyUpdate('A fresh version is available', () => {
+              app.notifyUpdate('A fresh version is available', () => {
                 newWorker.postMessage({
                   type: 'skipWaiting'
                 });
@@ -64,9 +64,7 @@
               break;
           }
         });
-
-        new V2Sequencer();
-      }
+      });
     </script>
   </body>
 </html>
