@@ -1,5 +1,5 @@
 const name = 'sequencer';
-const version = 107;
+const version = 117;
 const files = [
   './',
   'css/fonts.css',

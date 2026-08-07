@@ -46,7 +46,7 @@ class V2Sequencer extends V2AppSection {
   });
 
   constructor(app) {
-    super(app, 'player');
+    super(app, 'player', '--music', 'Pattern', 'Arrange and Play Notes');
     Object.seal(this);
 
     app.sequencer = this;

@@ -204,6 +204,7 @@ class V2SequencerOutput extends V2AppSection {
       });
     });
 
+
     track.note.update(60 + trackIndex, true);
     return track;
   }
