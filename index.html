@@ -5,8 +5,8 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <meta name="name" content="sequencer">
     <meta name="description" content="MIDI Sequencer">
-    <meta name="version" content="103">
-    <meta name="revised" content="2026-08-06">
+    <meta name="version" content="107">
+    <meta name="revised" content="2026-08-07">
     <meta name="copyright" content="Anyone can use this public domain work without having to seek authorisation, no one can ever own it.">
     <meta name="rating" content="safe for kids">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,7 +40,10 @@
       'use strict';
 
       new V2App((app) => {
-        new V2Sequencer();
+        app.sequencer = null;
+        Object.seal(app);
+
+        new V2Sequencer(app);
 
         // Cache the content for offline operation.
         app.registerServiceWorker('service-worker.js', (state, newWorker) => {

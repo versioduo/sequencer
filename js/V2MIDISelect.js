@@ -8,6 +8,8 @@ class V2MIDISelect {
   #devices = null;
 
   constructor(canvas, handler) {
+    Object.seal(this);
+
     V2App.addElement(canvas, 'select', (s) => {
       this.element = s;
       s.disabled = true;
@@ -30,8 +32,6 @@ class V2MIDISelect {
       if (handler)
         handler(s);
     });
-
-    return Object.seal(this);
   }
 
   update(devices) {

@@ -45,8 +45,11 @@ class V2Sequencer extends V2AppSection {
     quarter: 0
   });
 
-  constructor() {
-    super('player');
+  constructor(app) {
+    super(app, 'player');
+    Object.seal(this);
+
+    app.sequencer = this;
     this.addSection();
     this.#notify = new V2AppNotify(this.canvas);
 
@@ -251,8 +254,8 @@ class V2Sequencer extends V2AppSection {
         active = false;
 
         constructor(element) {
+          Object.seal(this);
           this.element = element;
-          return Object.seal(this);
         }
 
         // Changes the brightness of the pad from grey to black, depending on the velocity.
@@ -397,8 +400,8 @@ class V2Sequencer extends V2AppSection {
         '</a>, version ' + Number(document.querySelector('meta[name="version"]').content);
     });
 
-    this.#library = new V2SequencerLibrary(this);
-    this.#output = new V2SequencerOutput(this);
+    this.#library = app.addSection(V2SequencerLibrary);
+    this.#output = app.addSection(V2SequencerOutput);
     this.#output.assignDevices();
 
     this.#output.addNotifier('changed', () => {
@@ -420,8 +423,6 @@ class V2Sequencer extends V2AppSection {
           this.#play();
       }
     });
-
-    return Object.seal(this);
   }
 
   addNotifier(type, handler) {

@@ -1,14 +1,12 @@
 class V2SequencerOutput extends V2AppSection {
-  #sequencer = null;
   #tracks = null;
-
   #notifiers = Object.seal({
     changed: [],
   });
 
-  constructor(sequencer) {
-    super('output', '--right-from-bracket', 'Output', 'Assign Devices and Notes to Tracks');
-    this.#sequencer = sequencer;
+  constructor(app) {
+    super(app, 'output', '--right-from-bracket', 'Output', 'Assign Devices and Notes to Tracks');
+    Object.seal(this);
     this.addSection();
 
     new V2AppMenu(this.canvas, (menu) => {
@@ -27,18 +25,16 @@ class V2SequencerOutput extends V2AppSection {
       cards.classList.add('cards', '--grid');
 
       const tracks = [];
-      for (let i = 0; i < this.#sequencer.nTracks; i++)
+      for (let i = 0; i < this.app.sequencer.nTracks; i++)
         tracks[i] = this.#addTrack(cards, i);
 
       this.#tracks = Object.seal(tracks);
     });
 
-    const devices = this.#sequencer.midi.getDevices('input');
+    const devices = this.app.sequencer.midi.getDevices('input');
     for (const track of this.#tracks) {
       track.select.update(devices);
     }
-
-    return Object.seal(this);
   }
 
   addNotifier(type, handler) {
@@ -101,8 +97,8 @@ class V2SequencerOutput extends V2AppSection {
         });
       });
 
-      this.#sequencer.midi.addNotifier('state', (event) => {
-        track.select.update(this.#sequencer.midi.getDevices('input'));
+      this.app.sequencer.midi.addNotifier('state', (event) => {
+        track.select.update(this.app.sequencer.midi.getDevices('input'));
         this.#assignDevice(track);
       });
 
@@ -318,7 +314,7 @@ class V2SequencerOutput extends V2AppSection {
   }
 
   setConfig(config) {
-    for (let track = 0; track < this.#sequencer.nTracks; track++) {
+    for (let track = 0; track < this.app.sequencer.nTracks; track++) {
       this.#tracks[track].select.setDisconnected();
       this.#tracks[track].device = null;
       this.#tracks[track].deviceName = config[track].deviceName;

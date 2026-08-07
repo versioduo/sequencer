@@ -1,19 +1,16 @@
 class V2SequencerLibrary extends V2AppSection {
-  #sequencer = null;
-
   #notify = null;
-
   #addButton = null;
   #deleteButton = null;
   #copyButton = null;
   #pasteButton = null;
-
   #list = null;
 
-  constructor(sequencer) {
-    super('library', '--book-open-reader', 'Library', 'Store and Load Patterns');
-    this.#sequencer = sequencer;
+  constructor(app) {
+    super(app, 'library', '--book-open-reader', 'Library', 'Store and Load Patterns');
+    Object.seal(this);
     this.addSection();
+
     this.#notify = new V2AppNotify(this.canvas);
 
     new V2AppMenu(this.canvas, (menu) => {
@@ -26,7 +23,7 @@ class V2SequencerLibrary extends V2AppSection {
         e.addEventListener('click', () => {
           this.#notify.clear();
 
-          const entry = this.#addEntry(this.#sequencer.getConfig());
+          const entry = this.#addEntry(this.app.sequencer.getConfig());
           this.#selectEntry(entry);
 
           V2SequencerDatabase.add(entry.config, (id) => {
@@ -66,7 +63,7 @@ class V2SequencerLibrary extends V2AppSection {
           this.#notify.clear();
 
           const config = {
-            'com.versioduo.sequencer.pattern': this.#sequencer.getConfig()
+            'com.versioduo.sequencer.pattern': this.app.sequencer.getConfig()
           };
 
           navigator.clipboard.writeText(JSON.stringify(config)).then(() => {
@@ -120,7 +117,7 @@ class V2SequencerLibrary extends V2AppSection {
       });
     });
 
-    this.#sequencer.addNotifier('changed', () => {
+    this.app.sequencer.addNotifier('changed', () => {
       this.#notify.clear();
       this.#selectEntry();
     });
@@ -129,8 +126,6 @@ class V2SequencerLibrary extends V2AppSection {
       for (const entry of entries)
         this.#addEntry(entry);
     });
-
-    return Object.seal(this);
   }
 
   #selectEntry(e) {
@@ -165,16 +160,16 @@ class V2SequencerLibrary extends V2AppSection {
     entry.element.style.marginBottom = '0.5rem';
     entry.element.addEventListener('click', () => {
       this.#selectEntry(entry);
-      this.#sequencer.setConfig(this.#list.selected.config);
+      this.app.sequencer.setConfig(this.#list.selected.config);
     });
 
-    for (let track = 0; track < this.#sequencer.nTracks; track++) {
+    for (let track = 0; track < this.app.sequencer.nTracks; track++) {
       V2App.addElement(entry.element, 'div', (row) => {
         row.style.width = '100%';
         row.style.height = '0.5rem';
         row.style.clear = 'left';
 
-        for (let quarter = 0; quarter < this.#sequencer.nQuarters; quarter++) {
+        for (let quarter = 0; quarter < this.app.sequencer.nQuarters; quarter++) {
           V2App.addElement(row, 'div', (e) => {
             e.style.float = 'left';
             e.style.width = '6.25%';
