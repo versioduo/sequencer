@@ -23,7 +23,7 @@ class V2SequencerLibrary extends V2AppSection {
         e.addEventListener('click', () => {
           this.#notify.clear();
 
-          const entry = this.#addEntry(this.app.sequencer.getConfig());
+          const entry = this.#addEntry(this.app.main.getConfig());
           this.#selectEntry(entry);
 
           V2SequencerDatabase.add(entry.config, (id) => {
@@ -63,7 +63,7 @@ class V2SequencerLibrary extends V2AppSection {
           this.#notify.clear();
 
           const config = {
-            'com.versioduo.sequencer.pattern': this.app.sequencer.getConfig()
+            'com.versioduo.sequencer.pattern': this.app.main.getConfig()
           };
 
           navigator.clipboard.writeText(JSON.stringify(config)).then(() => {
@@ -117,7 +117,7 @@ class V2SequencerLibrary extends V2AppSection {
       });
     });
 
-    this.app.sequencer.addNotifier('changed', () => {
+    this.app.main.addNotifier('changed', () => {
       this.#notify.clear();
       this.#selectEntry();
     });
@@ -160,23 +160,23 @@ class V2SequencerLibrary extends V2AppSection {
     entry.element.style.marginBottom = '0.5rem';
     entry.element.addEventListener('click', () => {
       this.#selectEntry(entry);
-      this.app.sequencer.setConfig(this.#list.selected.config);
+      this.app.main.setConfig(this.#list.selected.config);
     });
 
-    for (let track = 0; track < this.app.sequencer.nTracks; track++) {
+    for (let track = 0; track < this.app.main.nTracks; track++) {
       V2App.addElement(entry.element, 'div', (row) => {
         row.style.width = '100%';
         row.style.height = '0.5rem';
         row.style.clear = 'left';
 
-        for (let quarter = 0; quarter < this.app.sequencer.nQuarters; quarter++) {
+        for (let quarter = 0; quarter < this.app.main.nQuarters; quarter++) {
           V2App.addElement(row, 'div', (e) => {
             e.style.float = 'left';
             e.style.width = '6.25%';
             e.style.height = '100%';
             if (entry.config.tracks[track][quarter] > 0)
-              e.style.backgroundColor = V2Sequencer.getVelocityHSL(entry.config.tracks[track][quarter]);
-          });;
+              e.style.backgroundColor = 'hsl(0, 0%, ' + this.app.main.getBrightness(entry.config.tracks[track][quarter]) + '%)';
+          });
         }
       });
     }

@@ -1,4 +1,4 @@
-class V2Sequencer extends V2AppSection {
+class V2Main extends V2AppSection {
   midi = null;
 
   nTracks = 4;
@@ -46,10 +46,10 @@ class V2Sequencer extends V2AppSection {
   });
 
   constructor(app) {
-    super(app, 'player', '--music', 'Pattern', 'Arrange and Play Notes');
+    super(app, 'player', '--chess-board', 'Pattern', 'Arrange and Play Notes');
     Object.seal(this);
 
-    app.sequencer = this;
+    app.main = this;
     this.addSection();
     this.#notify = new V2AppNotify(this.canvas);
 
@@ -95,159 +95,6 @@ class V2Sequencer extends V2AppSection {
 
 
     {
-      let range = null;
-
-      this.#volume.update = (number) => {
-        if (isNull(number))
-          return;
-
-        if (number < 0)
-          number = 0;
-
-        else if (number > 127)
-          number = 127;
-
-        this.#volume.element.value = number;
-        range.value = number;
-        this.#output.sendControlChange(V2MIDI.CC.channelVolume, Number(number));
-      };
-
-      new V2AppMenu(this.canvas, (menu) => {
-        menu.element.classList.add('full');
-
-        menu.addElement('span', (e) => {
-          e.classList.add('label');
-          e.textContent = 'CC 7';
-        });
-
-        menu.addElement('span', (e) => {
-          e.classList.add('grow');
-          e.textContent = 'Volume';
-        });
-
-        menu.addElement('input', (e) => {
-          this.#volume.element = e;
-          e.type = 'number';
-          e.max = 127;
-          e.value = 100;
-          e.addEventListener('input', () => {
-            this.#volume.update(e.value);
-          });
-        });
-
-        menu.addElement('button', (e) => {
-          V2App.addElement(e, 'i', (i) => {
-            i.classList.add('icon', '--nospace', '--minus');
-          });
-          e.addEventListener('click', () => {
-            this.#volume.element.stepDown();
-            this.#volume.element.dispatchEvent(new Event('input'));
-          });
-        });
-
-        menu.addElement('button', (e) => {
-          V2App.addElement(e, 'i', (i) => {
-            i.classList.add('icon', '--nospace', '--plus');
-          });
-          e.addEventListener('click', () => {
-            this.#volume.element.stepUp();
-            this.#volume.element.dispatchEvent(new Event('input'));
-          });
-        });
-      });
-
-      V2App.addElement(this.canvas, 'input', (e) => {
-        range = e;
-        e.type = 'range';
-        e.max = 127;
-        e.value = 100;
-        e.addEventListener('input', () => {
-          this.#volume.update(e.value);
-        });
-      });
-    }
-
-    {
-      let range = null;
-
-      this.#bpm.update = (number, silent = false) => {
-        if (isNull(number) || number < 20 || number > 999)
-          return;
-
-        if (!silent) {
-          for (const notifier of this.#notifiers.changed)
-            notifier();
-        }
-
-        this.#bpm.element.value = number;
-        range.value = number;
-
-        if (this.#run.timer !== null)
-          this.#setTimer();
-      };
-
-      new V2AppMenu(this.canvas, (menu) => {
-        menu.element.classList.add('full');
-
-        menu.addElement('span', (e) => {
-          e.classList.add('grow');
-          e.textContent = 'BPM';
-        });
-
-        menu.addElement('input', (e) => {
-          this.#bpm.element = e;
-          e.type = 'number';
-          e.min = 20;
-          e.max = 999;
-          e.value = 120;
-          e.addEventListener('input', (event) => {
-            this.#bpm.update(e.value);
-          });
-          e.addEventListener('change', () => {
-            if (e.value < 20)
-              e.value = 20;
-
-            else if (e.value > 999)
-              e.value = 999;
-
-            this.#bpm.update(e.value);
-          });
-        });
-
-        menu.addElement('button', (e) => {
-          V2App.addElement(e, 'i', (i) => {
-            i.classList.add('icon', '--nospace', '--minus');
-          });
-          e.addEventListener('click', () => {
-            this.#bpm.element.stepDown();
-            this.#bpm.element.dispatchEvent(new Event('input'));
-          });
-        });
-
-        menu.addElement('button', (e) => {
-          V2App.addElement(e, 'i', (i) => {
-            i.classList.add('icon', '--nospace', '--plus');
-          });
-          e.addEventListener('click', () => {
-            this.#bpm.element.stepUp();
-            this.#bpm.element.dispatchEvent(new Event('input'));
-          });
-        });
-      });
-
-      V2App.addElement(this.canvas, 'input', (e) => {
-        range = e;
-        e.type = 'range';
-        e.min = 20;
-        e.max = 999;
-        e.value = this.#bpm.element.value;
-        e.addEventListener('input', (event) => {
-          this.#bpm.update(e.value);
-        });
-      });
-    }
-
-    {
       class Pad {
         element = null;
         velocity = 0;
@@ -263,12 +110,11 @@ class V2Sequencer extends V2AppSection {
           this.velocity = Number(velocity);
 
           if (this.velocity > 0) {
-            this.element.style.backgroundColor = V2Sequencer.getVelocityHSL(this.velocity);
+            this.element.style.backgroundColor = 'hsl(0, 0%, ' + app.main.getBrightness(velocity) + '%)';
 
           } else {
             if (Math.floor(quarter / 4) % 2)
               this.element.style.backgroundColor = 'hsl(from var(--colour-background-light) h s calc(l - 10))';
-
             else
               this.element.style.backgroundColor = 'var(--colour-background-light)';
           }
@@ -392,6 +238,159 @@ class V2Sequencer extends V2AppSection {
       });
     }
 
+    {
+      let range = null;
+
+      this.#bpm.update = (number, silent = false) => {
+        if (isNull(number) || number < 20 || number > 999)
+          return;
+
+        if (!silent) {
+          for (const notifier of this.#notifiers.changed)
+            notifier();
+        }
+
+        this.#bpm.element.value = number;
+        range.value = number;
+
+        if (this.#run.timer !== null)
+          this.#setTimer();
+      };
+
+      new V2AppMenu(this.canvas, (menu) => {
+        menu.element.classList.add('full');
+
+        menu.addElement('span', (e) => {
+          e.classList.add('grow');
+          e.textContent = 'BPM';
+        });
+
+        menu.addElement('input', (e) => {
+          this.#bpm.element = e;
+          e.type = 'number';
+          e.min = 20;
+          e.max = 999;
+          e.value = 120;
+          e.addEventListener('input', (event) => {
+            this.#bpm.update(e.value);
+          });
+          e.addEventListener('change', () => {
+            if (e.value < 20)
+              e.value = 20;
+
+            else if (e.value > 999)
+              e.value = 999;
+
+            this.#bpm.update(e.value);
+          });
+        });
+
+        menu.addElement('button', (e) => {
+          V2App.addElement(e, 'i', (i) => {
+            i.classList.add('icon', '--nospace', '--minus');
+          });
+          e.addEventListener('click', () => {
+            this.#bpm.element.stepDown();
+            this.#bpm.element.dispatchEvent(new Event('input'));
+          });
+        });
+
+        menu.addElement('button', (e) => {
+          V2App.addElement(e, 'i', (i) => {
+            i.classList.add('icon', '--nospace', '--plus');
+          });
+          e.addEventListener('click', () => {
+            this.#bpm.element.stepUp();
+            this.#bpm.element.dispatchEvent(new Event('input'));
+          });
+        });
+      });
+
+      V2App.addElement(this.canvas, 'input', (e) => {
+        range = e;
+        e.type = 'range';
+        e.min = 20;
+        e.max = 999;
+        e.value = this.#bpm.element.value;
+        e.addEventListener('input', (event) => {
+          this.#bpm.update(e.value);
+        });
+      });
+    }
+
+    {
+      let range = null;
+
+      this.#volume.update = (number) => {
+        if (isNull(number))
+          return;
+
+        if (number < 0)
+          number = 0;
+
+        else if (number > 127)
+          number = 127;
+
+        this.#volume.element.value = number;
+        range.value = number;
+        this.#output.sendControlChange(V2MIDI.CC.channelVolume, Number(number));
+      };
+
+      new V2AppMenu(this.canvas, (menu) => {
+        menu.element.classList.add('full');
+
+        menu.addElement('span', (e) => {
+          e.classList.add('label');
+          e.textContent = 'CC 7';
+        });
+
+        menu.addElement('span', (e) => {
+          e.classList.add('grow');
+          e.textContent = 'Volume';
+        });
+
+        menu.addElement('input', (e) => {
+          this.#volume.element = e;
+          e.type = 'number';
+          e.max = 127;
+          e.value = 100;
+          e.addEventListener('input', () => {
+            this.#volume.update(e.value);
+          });
+        });
+
+        menu.addElement('button', (e) => {
+          V2App.addElement(e, 'i', (i) => {
+            i.classList.add('icon', '--nospace', '--minus');
+          });
+          e.addEventListener('click', () => {
+            this.#volume.element.stepDown();
+            this.#volume.element.dispatchEvent(new Event('input'));
+          });
+        });
+
+        menu.addElement('button', (e) => {
+          V2App.addElement(e, 'i', (i) => {
+            i.classList.add('icon', '--nospace', '--plus');
+          });
+          e.addEventListener('click', () => {
+            this.#volume.element.stepUp();
+            this.#volume.element.dispatchEvent(new Event('input'));
+          });
+        });
+      });
+
+      V2App.addElement(this.canvas, 'input', (e) => {
+        range = e;
+        e.type = 'range';
+        e.max = 127;
+        e.value = 100;
+        e.addEventListener('input', () => {
+          this.#volume.update(e.value);
+        });
+      });
+    }
+
     V2App.addElement(this.canvas, 'p', (e) => {
       this.#version = e;
       e.classList.add('center');
@@ -425,14 +424,13 @@ class V2Sequencer extends V2AppSection {
     });
   }
 
-  addNotifier(type, handler) {
-    this.#notifiers[type].push(handler);
+  getBrightness(velocity) {
+    const fraction = 1 - (velocity / 127);
+    return Math.floor(10 + (60 * fraction));
   }
 
-  static getVelocityHSL(velocity) {
-    const fraction = 1 - (velocity / 127);
-    const brightness = Math.floor(10 + (60 * fraction));
-    return 'hsl(0, 0%, ' + brightness + '%)';
+  addNotifier(type, handler) {
+    this.#notifiers[type].push(handler);
   }
 
   #reset() {

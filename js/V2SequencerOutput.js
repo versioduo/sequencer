@@ -25,13 +25,13 @@ class V2SequencerOutput extends V2AppSection {
       cards.classList.add('cards', '--grid');
 
       const tracks = [];
-      for (let i = 0; i < this.app.sequencer.nTracks; i++)
+      for (let i = 0; i < this.app.main.nTracks; i++)
         tracks[i] = this.#addTrack(cards, i);
 
       this.#tracks = Object.seal(tracks);
     });
 
-    const devices = this.app.sequencer.midi.getDevices('input');
+    const devices = this.app.main.midi.getDevices('input');
     for (const track of this.#tracks) {
       track.select.update(devices);
     }
@@ -95,10 +95,36 @@ class V2SequencerOutput extends V2AppSection {
               notifier();
           });
         });
+
+        menu.addElement('button', (e) => {
+          V2App.addElement(e, 'i', (i) => {
+            i.classList.add('icon', '--nospace', '--minus');
+          });
+          e.addEventListener('click', () => {
+            if (track.channelElement.selectedIndex === 0)
+              return;
+
+            track.channelElement.selectedIndex--;
+            track.channelElement.dispatchEvent(new Event('change'));
+          });
+        });
+
+        menu.addElement('button', (e) => {
+          V2App.addElement(e, 'i', (i) => {
+            i.classList.add('icon', '--nospace', '--plus');
+          });
+          e.addEventListener('click', () => {
+            if (track.channelElement.selectedIndex === track.channelElement.options.length - 1)
+              return;
+
+            track.channelElement.selectedIndex++;
+            track.channelElement.dispatchEvent(new Event('change'));
+          });
+        });
       });
 
-      this.app.sequencer.midi.addNotifier('state', (event) => {
-        track.select.update(this.app.sequencer.midi.getDevices('input'));
+      this.app.main.midi.addNotifier('state', (event) => {
+        track.select.update(this.app.main.midi.getDevices('input'));
         this.#assignDevice(track);
       });
 
@@ -315,7 +341,7 @@ class V2SequencerOutput extends V2AppSection {
   }
 
   setConfig(config) {
-    for (let track = 0; track < this.app.sequencer.nTracks; track++) {
+    for (let track = 0; track < this.app.main.nTracks; track++) {
       this.#tracks[track].select.setDisconnected();
       this.#tracks[track].device = null;
       this.#tracks[track].deviceName = config[track].deviceName;

@@ -1,5 +1,5 @@
 const name = 'sequencer';
-const version = 117;
+const version = 127;
 const files = [
   './',
   'css/fonts.css',
@@ -10,7 +10,7 @@ const files = [
   'js/V2App.js',
   'js/V2MIDI.js',
   'js/V2MIDISelect.js',
-  'js/V2Sequencer.js',
+  'js/V2Main.js',
   'js/V2SequencerDatabase.js',
   'js/V2SequencerLibrary.js',
   'js/V2SequencerOutput.js',
